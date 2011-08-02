@@ -99,7 +99,7 @@
           gitignore-lines (string/split-lines (slurp gitignore-file))
           ns-name (config-namespace configleaf-data)
           ns-filepath (namespace-to-filepath ns-name)
-          config-ns-re (re-pattern (str "\\Q" ;; Quote whole thing.
+          config-ns-re (re-pattern (str "\\Qsrc/" ;; Quote whole thing.
                                         ns-filepath
                                         "\\E"))]
       (when (not (some #(re-matches #"\.configleaf" %) gitignore-lines))
