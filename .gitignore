@@ -3,3 +3,4 @@ pom.xml
 lib
 classes
 .configleaf
+src/cfg/test_ns.clj

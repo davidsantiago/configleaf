@@ -5,8 +5,8 @@
                  [robert/hooke "1.1.2"]]
   :dev-dependencies [[ritz "0.1.7"]]
 
-  ;  :eval-in-leiningen true
-  :hooks [leiningen.configleaf]
+  :eval-in-leiningen true
+  :hooks [configleaf.hooks]
 
   :configleaf {:configurations {:test {}}
-               :namespace test.testing})
+               :namespace cfg.test-ns})
