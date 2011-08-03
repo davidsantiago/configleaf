@@ -2,3 +2,5 @@ pom.xml
 *jar
 lib
 classes
+.configleaf
+src/cfg/test_ns.clj
