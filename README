@@ -57,7 +57,7 @@ command line. There are just a few commands.
 
 To install Configleaf, add the following to your dev-dependencies
 
-    [configleaf "0.1.0-SNAPSHOT"]
+    [configleaf "0.1.0"]
     
 After you set up the configleaf key in your project (see above), you will probably also
 want to add two directories to your `.gitignore` file. The first is the directory
