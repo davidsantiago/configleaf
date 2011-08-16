@@ -8,5 +8,7 @@
   :eval-in-leiningen true
   :hooks [configleaf.hooks]
 
-  :configleaf {:configurations {:test {}}
+  :configleaf {:configurations {:test {:data {:test 1}
+                                       :properties {"test" "1"
+                                                    :test2 "2"}}}
                :namespace cfg.test-ns})
