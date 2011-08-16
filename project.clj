@@ -1,4 +1,4 @@
-(defproject configleaf "0.1.0"
+(defproject configleaf "0.2.0-SNAPSHOT"
   :description "Software configuration for Clojure"
   :dependencies [[org.clojure/clojure "1.2.0"]
                  [stencil "0.1.2"]
