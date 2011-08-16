@@ -29,7 +29,9 @@
   (let [configleaf-data (:configleaf project)
         current-config (get-current-config configleaf-data)]
     (task project form handler skip-auto-compile
-          `(do (require '~'leiningen.configleaf)
+          `(do (require '~'leiningen.configleaf
+                        '~'configleaf.core)
+               (set-system-properties '~configleaf-data ~current-config)
                (setup-config-namespace '~configleaf-data ~current-config)
                ~init))))
 

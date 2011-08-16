@@ -1,7 +1,8 @@
 (ns configleaf.core
   (:require [clojure.java.io :as io]
             [clojure.string :as string]
-            [stencil.core :as stencil]))
+            [stencil.core :as stencil])
+  (:import java.util.Properties))
 
 ;;
 ;; Functions that provide functionality independent of any one build tool.
@@ -64,7 +65,8 @@
   [configleaf-data current-cfg]
   (let [cl-ns-name (symbol (config-namespace configleaf-data))
         current-cfg-data (get-in configleaf-data [:configurations
-                                                  current-cfg])]
+                                                  current-cfg
+                                                  :data])]
     (create-ns cl-ns-name)
     (intern cl-ns-name 'config-data current-cfg-data)
     (intern cl-ns-name 'config current-cfg)))
@@ -84,11 +86,28 @@
       (.mkdirs ns-parent-dir))
     (spit ns-file (stencil/render-file "templates/configleafns"
                                        {:namespace ns-name
-                                        :config (get-current-config
-                                                 configleaf-data)
+                                        :config current-cfg
                                         :config-data (get-in configleaf-data
                                                              [:configurations
-                                                              current-cfg])}))))
+                                                              current-cfg
+                                                              :data])}))))
+
+(defn set-system-properties
+  "Adds any properties from the current configuration's :properties key to
+   the Java system properties. Both the key and value must be strings."
+  [configleaf-data current-cfg]
+  (let [props (Properties. (System/getProperties))
+        config-properties (get-in configleaf-data [:configurations
+                                                   current-cfg
+                                                   :properties])]
+    (doseq [[k v] config-properties]
+      (try
+        (.setProperty props k v)
+        (catch Exception e
+          (println "Configleaf")
+          (println "  Properties keys and values must both be strings.")
+          (println (str "  Skipping key: " k " value: " v)))))
+    (System/setProperties props)))
 
 (defn check-gitignore
   "Check the .gitignore file for the project to see if .configleaf/ is ignored,
