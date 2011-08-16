@@ -50,11 +50,13 @@ The second part of using Configleaf is controlling the active configuration from
 command line. There are just a few commands.
 
 * `lein configleaf status` Prints the currently active configuration. 
+
 ```
     lein configleaf status
     Configleaf
       Current configuration:  :test
 ```
+
 * `lein configleaf set-config [config]` Sets the currently active configuration to config.
 
 ## Installation
