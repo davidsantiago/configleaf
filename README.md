@@ -39,7 +39,6 @@ the following global options:
     from this section and call it during your application's initialization.
     
     In the config namespace created, there will be three values:
-    
     * `profile-name` - The name of the profile (eg, :test, :dev, etc).
     * `profile` - The entire contents of the profile (all sections).
     * `params` - The contents of the params map for the current profile.
@@ -64,6 +63,7 @@ They will have the following values, when run in the `:dev` configuration.
 
 * `cfg.myproject/profile-name` Will be `:dev`.
 * `cfg.myproject/profile` Will be
+
     ```clojure
         {:params {:db "127.0.0.1"}
          :java-properties {"pallet.admin.username" "don"}}
@@ -72,6 +72,7 @@ They will have the following values, when run in the `:dev` configuration.
 
 Additionally, if you were to start a repl or Swank with `lein repl` or `lein swank`, you
 would find that
+
 ```clojure
 user=> (System/getProperty "pallet.admin.username")
 "don" 
