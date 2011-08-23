@@ -13,32 +13,32 @@
   (println "  set-config - Set the current configuration.")
   (println "  status     - Display the current configuration."))
 
-(defn print-current-config
-  [configleaf-data]
-  (let [current-cfg (get-current-config configleaf-data)]
+(defn print-current-profile
+  [cl-config]
+  (let [current-profile (get-current-profile cl-config)]
     (println "Configleaf")
-    (if current-cfg
-      (println "  Current configuration: " current-cfg)
+    (if current-profile
+      (println "  Current configuration: " current-profile)
       (do
         (println "  No current configuration. Set one with set-config or")
         (println "  add a default.")))))
 
-(defn set-current-config
-  "Check if the given configuration is in the :configurations key of the
-   configleaf data and if so, write that as the current config."
-  [configleaf-data new-config]
-  (if (valid-configuration? configleaf-data new-config)
-    (save-current-config "." new-config)
+(defn set-current-profile
+  "Check if the given profile is in the :profiles key of the
+   configleaf data and if so, write that as the current profile."
+  [cl-config new-profile]
+  (if (valid-profile? cl-config new-profile)
+    (save-current-profile "." new-profile)
     (do (println "Configleaf")
-        (println "  The given configuration " new-config " does not exist."))))
+        (println "  The given configuration " new-profile " does not exist."))))
 
 (defn configleaf
   "Main entry point for explicitly issued plugin tasks."
   [project & [task & args]]
-  (let [configleaf-data (:configleaf project)]
+  (let [cl-config (:configleaf project)]
     (case task
-          "status" (print-current-config configleaf-data)
-          "set-config" (set-current-config configleaf-data
-                                           (read-string (first args)))
+          "status" (print-current-profile cl-config)
+          "set-profile" (set-current-profile cl-config
+                                             (read-string (first args)))
           (print-help))))
 
