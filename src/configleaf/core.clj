@@ -38,13 +38,13 @@
   []
   (read-current-profiles "."))
 
-(defn print-current-profiles
+(defn print-current-sticky-profiles
   "Given a set of profiles as an argument, print them in a standard way
    to stdout."
   [profiles]
   (if (not (empty? profiles))
-    (println "Current profiles:" profiles)
-    (println "Current profiles:")))
+    (println "Current sticky profiles:" profiles)
+    (println "Current sticky profiles:")))
 
 (defn valid-profile?
   "Returns true if profile is a profile listed in the project profiles."

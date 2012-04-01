@@ -39,7 +39,7 @@
   ;; project).
   (when (== 1 (count args))
     (println "")
-    (print-current-profiles (get-current-profiles))))
+    (print-current-sticky-profiles (get-current-profiles))))
 
 (defn activate
   []

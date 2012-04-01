@@ -19,4 +19,4 @@
     ;; args should not change anything.
     (if (not (empty? arg-profiles))
       (save-current-profiles "." new-profiles))
-    (print-current-profiles new-profiles)))
+    (print-current-sticky-profiles new-profiles)))
