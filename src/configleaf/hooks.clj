@@ -16,6 +16,9 @@
   (let [configured-project (merge-profiles project
                                            (get-current-profiles))]
     (output-config-namespace configured-project)
+    (if (get-in configured-project [:configleaf :verbose])
+      (println "Performing task" task-name "with profiles"
+               (:included-profiles (meta configured-project))))
     (apply task task-name configured-project args)))
 
 (defn setup-live-ns-hook
