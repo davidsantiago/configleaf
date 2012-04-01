@@ -42,7 +42,9 @@
   "Given a set of profiles as an argument, print them in a standard way
    to stdout."
   [profiles]
-  (println "Current profiles:" profiles))
+  (if profiles
+    (println "Current profiles:" profiles)
+    (println "Current profiles:")))
 
 (defn valid-profile?
   "Returns true if profile is a profile listed in the project profiles."
