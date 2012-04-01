@@ -1,9 +1,9 @@
 (ns configleaf.hooks
   (:use configleaf.core
-        leiningen.configleaf
         robert.hooke)
   (:require [leiningen.core.project :as project]
-            [leiningen.core.eval :as eval]))
+            [leiningen.core.eval :as eval]
+            leiningen.profiles))
 
 ;;
 ;; Leiningen hooks
@@ -31,7 +31,19 @@
                (require-config-namespace ~(pr-str configured-project))
                ~init))))
 
+(defn profiles-task-hook
+  "This is a hook for the profiles task, so it will print the current sticky
+   profiles after it does whatever it does."
+  [task & args]
+  (apply task args)
+  ;; Only print current profiles when no args on command line (first arg is
+  ;; project).
+  (when (== 1 (count args))
+    (println "")
+    (print-current-profiles (get-current-profiles))))
+
 (defn activate
   []
   (add-hook #'leiningen.core.main/apply-task setup-ns-hook)
-  (add-hook #'leiningen.core.eval/eval-in-project setup-live-ns-hook))
+  (add-hook #'leiningen.core.eval/eval-in-project setup-live-ns-hook)
+  (add-hook #'leiningen.profiles/profiles profiles-task-hook))

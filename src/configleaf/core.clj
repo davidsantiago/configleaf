@@ -33,11 +33,16 @@
     (spit config-file (prn-str current-profiles))))
 
 (defn get-current-profiles
-  "Return the current profiles (list of names) from the saved file. If no file,
-   return the default profiles. Otherwise, return nil."
+  "Return the current profiles (list of names) from the saved file.
+   Otherwise, return nil."
   []
-  (or (read-current-profiles ".")
-      [:dev :user :default]))
+  (read-current-profiles "."))
+
+(defn print-current-profiles
+  "Given a set of profiles as an argument, print them in a standard way
+   to stdout."
+  [profiles]
+  (println "Current profiles:" profiles))
 
 (defn valid-profile?
   "Returns true if profile is a profile listed in the project profiles."
