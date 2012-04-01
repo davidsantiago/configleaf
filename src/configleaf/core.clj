@@ -100,7 +100,10 @@
    in it when it is loaded. Returns the project with the profiles merged."
   [project]
   (let [ns-name (str (config-namespace project))
-        ns-file (io/file "src/"
+        src-path (or (get-in project [:configleaf :config-source-path])
+                     (first (:source-paths project))
+                     "src/")
+        ns-file (io/file src-path
                          (namespace-to-filepath ns-name))
         ns-parent-dir (.getParentFile ns-file)]
     (if (not (.exists ns-parent-dir))
