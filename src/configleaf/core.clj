@@ -42,7 +42,7 @@
   "Given a set of profiles as an argument, print them in a standard way
    to stdout."
   [profiles]
-  (if profiles
+  (if (not (empty? profiles))
     (println "Current profiles:" profiles)
     (println "Current profiles:")))
 
