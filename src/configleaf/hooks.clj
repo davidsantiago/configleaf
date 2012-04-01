@@ -27,7 +27,6 @@
         blah configured-project]
     (task configured-project form
           `(do (require 'configleaf.core)
-               (set-system-properties ~(:java-properties configured-project))
                (require-config-namespace ~(pr-str configured-project))
                ~init))))
 
