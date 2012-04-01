@@ -1,8 +1,8 @@
 (ns configleaf.hooks
   (:use configleaf.core
         robert.hooke)
-  (:require [leiningen.core.project :as project]
-            [leiningen.core.eval :as eval]
+  (:require leiningen.core.project
+            leiningen.core.eval
             leiningen.profiles))
 
 ;;
