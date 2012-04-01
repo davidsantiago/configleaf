@@ -8,7 +8,6 @@
   :eval-in-leiningen true
   :hooks [configleaf.hooks]
 
-  :configleaf {:profiles {:test {:params {:test 1}
-                                 :java-properties {"test" "1"
-                                                   :test2 "2"}}}
-               :namespace cfg.test-ns})
+  :profiles {:test {:params {:test 1}
+                    :java-properties {"test" "1"
+                                      :test2 "2"}}})

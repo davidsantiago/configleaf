@@ -1,55 +1,67 @@
 (ns configleaf.core
   (:require [clojure.java.io :as io]
             [clojure.string :as string]
-            [stencil.core :as stencil])
+            [stencil.core :as stencil]
+            [leiningen.core.project :as project])
   (:import java.util.Properties))
 
 ;;
 ;; Functions that provide functionality independent of any one build tool.
 ;;
 
-(defn read-current-profile
-  "Read the current profile from the config file for the project
+(defn read-current-profiles
+  "Read the current profiles from the config file for the project
    at the given path. For example, if the argument is \"/home/david\", reads
    \"/home/david/.configleaf/current\". .configleaf/current should contain a
-   single form that names the current profile."
+   single form that lists the currently active profiles."
   [config-store-path]
   (let [config-file (io/file config-store-path ".configleaf/current")]
     (when (and (.exists config-file)
                (.isFile config-file))
-      (read-string (slurp config-file)))))
+      (binding [*read-eval* false]
+        (read-string (slurp config-file))))))
 
-(defn save-current-profile
-  "Store the given profile as the new current profile for the project
+(defn save-current-profiles
+  "Store the given profiles as the new current profiles for the project
    at the given path."
-  [config-store-path current-profile]
+  [config-store-path current-profiles]
   (let [config-dir (io/file config-store-path ".configleaf")
         config-file (io/file config-store-path ".configleaf/current")]
     (if (not (and (.exists config-dir)
                   (.isDirectory config-dir)))
       (.mkdir config-dir))
-    (spit config-file (prn-str current-profile))))
+    (spit config-file (prn-str current-profiles))))
 
-(defn get-current-profile
-  "Return the current profile (name) from the saved file. If no file,
-   return the default profile. Otherwise, return nil."
-  [cl-config]
-  (or (read-current-profile ".")
-      (:default cl-config)))
+(defn get-current-profiles
+  "Return the current profiles (list of names) from the saved file. If no file,
+   return the default profiles. Otherwise, return nil."
+  []
+  (or (read-current-profiles ".")
+      [:dev :user :default]))
 
 (defn valid-profile?
-  "Returns true if profile is a profile listed in the cl-config data, where
-   cl-config is the entire :configleaf data from the project.clj."
-  [cl-config profile]
-  (contains? (apply hash-set (keys (:profiles cl-config)))
+  "Returns true if profile is a profile listed in the project profiles."
+  [project profile]
+  (contains? (apply hash-set (keys (:profiles project)))
              profile))
 
 (defn config-namespace
   "Get the namespace to put the profile info into, or use the default
-   (which is configleaf.current)."
-  [cl-config]
-  (or (:namespace cl-config)
-      'configleaf.current))
+   (which is cfg.current)."
+  [project]
+  (or (get-in project [:configleaf :namespace])
+      'cfg.current))
+
+(defn merge-profiles
+  "Given the project map and a list of profile names, merge the profiles into
+   the project map and return the result. Will check the :included-profiles
+   metadata key to ensure that profiles are not merged multiple times."
+  [project profiles]
+  (let [included-profiles (into #{} (:included-profiles (meta project)))
+        profiles-to-add (filter #(and (not (contains? included-profiles %))
+                                      (contains? (:profiles project) %))
+                                profiles)]
+    (project/merge-profiles project profiles-to-add)))
 
 (defn namespace-to-filepath
   "Given a namespace as a string/symbol, return a string containing the path
@@ -60,47 +72,42 @@
                        {"." "/", "-" "_"})
        ".clj"))
 
-(defn setup-config-namespace
-  "Put the configured values into vars in the config namespace
-   (in the current JVM)."
-  [cl-config current-profile-name]
-  (let [cl-ns-name (symbol (config-namespace cl-config))
-        current-profile (get-in cl-config [:profiles current-profile-name])
-        current-profile-params (:params current-profile)]
+(defn require-config-namespace
+  "Put the configured project map (according to given project) into
+  a var in the config namespace (in the current JVM). Effect is as if
+  you have 'require'd the namespace, but there is no clj file involved
+  in the process.
+
+  Note the argument is a string. You need to print the project map to a string
+  to pass it into this function. This is so the string can survive leiningen 2's
+  own macro handling, which does not prevent a project map from being evaluated,
+  which you usually can't do, due to symbols and lists that would not eval."
+  [project-as-str]
+  (let [project (read-string project-as-str)
+        cl-ns-name (symbol (config-namespace project))]
     (create-ns cl-ns-name)
-    (intern cl-ns-name 'profile-name current-profile-name)
-    (intern cl-ns-name 'profile current-profile)
-    (intern cl-ns-name 'params current-profile-params)))
+    (intern cl-ns-name 'project project)))
 
 (defn output-config-namespace
-  "Write a Clojure file that will set up the config namespace and the values
-   in it when it is loaded."
-  [cl-config current-profile-name]
-  (let [ns-name (str (config-namespace cl-config))
+  "Write a Clojure file that will set up the config namespace with the project
+   in it when it is loaded. Returns the project with the profiles merged."
+  [project]
+  (let [ns-name (str (config-namespace project))
         ns-file (io/file "src/"
-                         (str (string/replace ns-name
-                                              #"[.-]"
-                                              {"." "/", "-" "_"})
-                              ".clj"))
-        ns-parent-dir (.getParentFile ns-file)
-        current-profile (get-in cl-config [:profiles current-profile-name])]
+                         (namespace-to-filepath ns-name))
+        ns-parent-dir (.getParentFile ns-file)]
     (if (not (.exists ns-parent-dir))
       (.mkdirs ns-parent-dir))
     (spit ns-file (stencil/render-file "templates/configleafns"
                                        {:namespace ns-name
-                                        :profile-name current-profile-name
-                                        :profile current-profile
-                                        :params (:params current-profile)}))))
+                                        :project project}))))
 
 (defn set-system-properties
-  "Adds any properties from the current configuration's :java-properties key to
-   the Java system properties. Both the key and value must be strings."
-  [cl-config current-profile]
-  (let [props (Properties. (System/getProperties))
-        profile-properties (get-in cl-config [:profiles
-                                              current-profile
-                                              :java-properties])]
-    (doseq [[k v] profile-properties]
+  "Given a map of string keys to string values, sets the Java properties named
+   by the keys to have the value in the corresponding value."
+  [properties]
+  (let [props (Properties. (System/getProperties))]
+    (doseq [[k v] properties]
       (try
         (.setProperty props k v)
         (catch Exception e

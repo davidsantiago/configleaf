@@ -1,6 +1,8 @@
 (ns leiningen.configleaf
   (:use configleaf.core)
-  (:require [clojure.java.io :as io]))
+  (:require [clojure.java.io :as io]
+            [clojure.set :as set]
+            [leiningen.core.project :as project]))
 
 ;;
 ;; Command handlers
@@ -10,35 +12,32 @@
   []
   (println "Configleaf commands:")
   (println "  help       - This command.")
-  (println "  set-config - Set the current configuration.")
+  (println "  set-profiles - Set the current configuration.")
   (println "  status     - Display the current configuration."))
 
-(defn print-current-profile
+(defn print-current-profiles
   [cl-config]
-  (let [current-profile (get-current-profile cl-config)]
+  (let [current-profiles (get-current-profiles)]
     (println "Configleaf")
-    (if current-profile
-      (println "  Current configuration: " current-profile)
+    (if current-profiles
+      (println "  Current configuration: " current-profiles)
       (do
-        (println "  No current configuration. Set one with set-config or")
+        (println "  No current configuration. Set one with set-profiles or")
         (println "  add a default.")))))
 
-(defn set-current-profile
-  "Check if the given profile is in the :profiles key of the
-   configleaf data and if so, write that as the current profile."
-  [cl-config new-profile]
-  (if (valid-profile? cl-config new-profile)
-    (save-current-profile "." new-profile)
-    (do (println "Configleaf")
-        (println "  The given configuration " new-profile " does not exist."))))
+(defn set-current-profiles
+  "Write the given profiles as the current profiles."
+  [project new-profiles]
+  (save-current-profiles "." new-profiles)
+  (do (println "Configleaf")
+      (println "  Current profiles:" new-profiles)))
 
 (defn configleaf
   "Main entry point for explicitly issued plugin tasks."
   [project & [task & args]]
   (let [cl-config (:configleaf project)]
     (case task
-          "status" (print-current-profile cl-config)
-          "set-profile" (set-current-profile cl-config
-                                             (read-string (first args)))
+          "status" (print-current-profiles cl-config)
+          "set-profiles" (set-current-profiles project
+                                               (map keyword args))
           (print-help))))
-
