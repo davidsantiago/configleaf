@@ -1,5 +1,5 @@
-(defproject configleaf "0.3.0"
-  :description "Software configuration for Clojure"
+(defproject configleaf "0.4.0"
+  :description "Persistent and buildable profiles in Leiningen."
   :dependencies [[org.clojure/clojure "1.2.0"]
                  [stencil "0.1.2"]
                  [robert/hooke "1.1.2"]]

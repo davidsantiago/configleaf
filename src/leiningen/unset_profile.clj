@@ -17,4 +17,4 @@
           (println "All profiles unset."))
       ;; No --all flag, so just unset the profiles mentioned.
       (do (save-current-profiles "." new-profiles)
-          (print-current-profiles new-profiles)))))
+          (print-current-sticky-profiles new-profiles)))))

@@ -16,6 +16,9 @@
   (let [configured-project (merge-profiles project
                                            (get-current-profiles))]
     (output-config-namespace configured-project)
+    (if (get-in configured-project [:configleaf :verbose])
+      (println "Performing task" task-name "with profiles"
+               (:included-profiles (meta configured-project))))
     (apply task task-name configured-project args)))
 
 (defn setup-live-ns-hook
@@ -27,7 +30,6 @@
         blah configured-project]
     (task configured-project form
           `(do (require 'configleaf.core)
-               (set-system-properties ~(:java-properties configured-project))
                (require-config-namespace ~(pr-str configured-project))
                ~init))))
 
@@ -40,7 +42,7 @@
   ;; project).
   (when (== 1 (count args))
     (println "")
-    (print-current-profiles (get-current-profiles))))
+    (print-current-sticky-profiles (get-current-profiles))))
 
 (defn activate
   []

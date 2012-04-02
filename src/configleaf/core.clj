@@ -38,11 +38,13 @@
   []
   (read-current-profiles "."))
 
-(defn print-current-profiles
+(defn print-current-sticky-profiles
   "Given a set of profiles as an argument, print them in a standard way
    to stdout."
   [profiles]
-  (println "Current profiles:" profiles))
+  (if (not (empty? profiles))
+    (println "Current sticky profiles:" profiles)
+    (println "Current sticky profiles:")))
 
 (defn valid-profile?
   "Returns true if profile is a profile listed in the project profiles."
@@ -98,7 +100,10 @@
    in it when it is loaded. Returns the project with the profiles merged."
   [project]
   (let [ns-name (str (config-namespace project))
-        ns-file (io/file "src/"
+        src-path (or (get-in project [:configleaf :config-source-path])
+                     (first (:source-paths project))
+                     "src/")
+        ns-file (io/file src-path
                          (namespace-to-filepath ns-name))
         ns-parent-dir (.getParentFile ns-file)]
     (if (not (.exists ns-parent-dir))
