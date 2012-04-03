@@ -8,3 +8,6 @@
 (ns {{&namespace}})
 
 (def project '{{&project}})
+
+{{! Easiest to just alter-var-root the project var with metadata. }}
+(alter-var-root #'project with-meta '{{&project-metadata}})
