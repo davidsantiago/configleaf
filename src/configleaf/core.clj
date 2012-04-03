@@ -89,11 +89,12 @@
   to pass it into this function. This is so the string can survive leiningen 2's
   own macro handling, which does not prevent a project map from being evaluated,
   which you usually can't do, due to symbols and lists that would not eval."
-  [project-as-str]
+  [project-as-str project-metadata-as-str]
   (let [project (read-string project-as-str)
+        project-metadata (read-string project-metadata-as-str)
         cl-ns-name (symbol (config-namespace project))]
     (create-ns cl-ns-name)
-    (intern cl-ns-name 'project project)))
+    (intern cl-ns-name (with-meta 'project project-metadata) project)))
 
 (defn output-config-namespace
   "Write a Clojure file that will set up the config namespace with the project
@@ -108,9 +109,14 @@
         ns-parent-dir (.getParentFile ns-file)]
     (if (not (.exists ns-parent-dir))
       (.mkdirs ns-parent-dir))
-    (spit ns-file (stencil/render-file "templates/configleafns"
-                                       {:namespace ns-name
-                                        :project project}))))
+    (spit ns-file
+          (stencil/render-file
+           "templates/configleafns"
+           {:namespace ns-name
+            :project project
+            :project-metadata (select-keys (meta project)
+                                           [:without-profiles
+                                            :included-profiles])}))))
 
 (defn set-system-properties
   "Given a map of string keys to string values, sets the Java properties named

@@ -26,11 +26,13 @@
    in the project. Works by adding a call to require-config-namespace to the
    init arg."
   [task & [project form init]]
-  (let [configured-project (merge-profiles project (get-current-profiles))
-        blah configured-project]
+  (let [configured-project (merge-profiles project (get-current-profiles))]
     (task configured-project form
           `(do (require 'configleaf.core)
-               (require-config-namespace ~(pr-str configured-project))
+               (require-config-namespace
+                ~(pr-str configured-project)
+                ~(pr-str (select-keys (meta configured-project)
+                                      [:without-profiles :included-profiles])))
                ~init))))
 
 (defn profiles-task-hook

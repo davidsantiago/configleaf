@@ -242,7 +242,7 @@ Created /Users/David/Documents/Development/Clojure/configleaf/target/configleaf-
 To install Configleaf, add the following to your project map as a plugin:
 
 ```
-[configleaf "0.4.0"]
+[configleaf "0.4.1"]
 ```
 Then add the following key-value pair in the top level of your project map:
 
@@ -259,6 +259,10 @@ with your profile values. In most of the examples above, you'd want to
 add "src/cfg/current.clj" or possibly "src/cfg" to your `.gitignore`, if there are no other files you will have in `src/cfg` that you wish to check into git.
 
 ## News
+
+* Version 0.4.1
+  * Minor update to ensure that project map metadata is baked along
+    with the project map.
 
 * Version 0.4.0
   * Extensive rewrite to work with Leiningen 2.
