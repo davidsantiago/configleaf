@@ -260,6 +260,10 @@ add "src/cfg/current.clj" or possibly "src/cfg" to your `.gitignore`, if there a
 
 ## News
 
+* Version 0.4.2
+  * Minor update to automatically add leiningen-core to dependencies, fixes certain
+    tasks were hooked but ran in project.
+
 * Version 0.4.1
   * Minor update to ensure that project map metadata is baked along
     with the project map.
