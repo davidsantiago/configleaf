@@ -260,6 +260,9 @@ add "src/cfg/current.clj" or possibly "src/cfg" to your `.gitignore`, if there a
 
 ## News
 
+* Version 0.4.3
+  * Minor update to also add configleaf itself to dependencies, fixes similar bugs.
+
 * Version 0.4.2
   * Minor update to automatically add leiningen-core to dependencies, fixes certain
     tasks were hooked but ran in project.
