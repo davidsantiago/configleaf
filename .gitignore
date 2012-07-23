@@ -1,6 +1,8 @@
 pom.xml
+/target
 *jar
 lib
 classes
 .configleaf
 src/cfg
+.lein-*
