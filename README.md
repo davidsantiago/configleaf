@@ -156,6 +156,9 @@ key, which should contain a map of option names to their values. Here are the cu
 * `:verbose` - Set this key to true if you'd like Configleaf to print
   out which profiles are included whenever a task is run. By default,
   this key is false.
+* `:never-sticky` - When present, this should be a vector containing a list of profile name keys
+  that should never be set sticky. For example, you can put your production profile in this
+  key to make sure you don't accidentally set yourself into a production profile.
 
 So for example, if the project map has the following map in the `:configleaf` key:
 
@@ -242,7 +245,7 @@ Created /Users/David/Documents/Development/Clojure/configleaf/target/configleaf-
 To install Configleaf, add the following to your project map as a plugin:
 
 ```
-[configleaf "0.4.5"]
+[configleaf "0.4.6"]
 ```
 Then add the following key-value pair in the top level of your project map:
 
@@ -259,6 +262,9 @@ with your profile values. In most of the examples above, you'd want to
 add "src/cfg/current.clj" or possibly "src/cfg" to your `.gitignore`, if there are no other files you will have in `src/cfg` that you wish to check into git.
 
 ## News
+
+* Version 0.4.6
+  * Implement the `:never-sticky` configuration key.
 
 * Version 0.4.5
   * Bug fixes; remove one of the hooks which is no longer necessary in lein2. Don't use earlier 0.4
