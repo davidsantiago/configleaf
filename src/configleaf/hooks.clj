@@ -4,7 +4,7 @@
   (:require [clojure.string :as string]
             [leiningen.core.project :as project]
             leiningen.core.eval
-            leiningen.profiles))
+            leiningen.show-profiles))
 
 ;;
 ;; Leiningen hooks
@@ -36,4 +36,4 @@
 (defn activate
   []
   (add-hook #'leiningen.core.main/apply-task setup-ns-hook)
-  (add-hook #'leiningen.profiles/profiles profiles-task-hook))
+  (add-hook #'leiningen.show-profiles/show-profiles profiles-task-hook))

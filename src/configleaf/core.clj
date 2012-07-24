@@ -38,6 +38,53 @@
   []
   (read-current-profiles "."))
 
+(defn- fixed-point
+  "Calls the function argument on the initial value, and then on the
+   result of function call, and so on, until the output value does not
+   change. You should be sure that func is a contraction mapping, or it
+   will loop forever."
+  [func initial]
+  (loop [input initial]
+    (let [output (func input)]
+      (if (= input output) output (recur output)))))
+
+(defn expand-profile
+  "Given a project map and a profile in the project map, expands the profile
+   into a seq of its constituent profiles. Composite profiles are expanded one
+   step, basic profiles are returned as the only member of the sequence."
+  [project profile]
+  (let [profile-val (get-in project [:profiles profile])]
+    (if (vector? profile-val)
+      profile-val
+      [profile])))
+
+(defn fully-expand-profile
+  "Reduce a given profile into a set of the names of its basic profiles."
+  [project profile]
+  (fixed-point (fn [profiles]
+                 (->> (map (partial expand-profile project) profiles)
+                      (flatten)
+                      ;; Append the flattened list of generated profiles onto
+                      ;; a list of all the profiles we've found so far that are
+                      ;; not composite (We just expanded the ones that are).
+                      (concat (filter #(not (vector? (get-in project
+                                                             [:profiles %])))
+                                      profiles))
+                      (into #{})))
+               [profile]))
+
+(defn unstickable-profiles
+  "Return all of the sets of the name keys of basic profiles that
+   cannot be made sticky according to the :configleaf configuration
+   key. Composite profiles are expanded away. Returns a set of the
+   sets of basic keys that cannot be set sticky in combination."
+   [project]
+  (let [unstickable-profiles (into #{}
+                                   (get-in project
+                                           [:configleaf :never-sticky]))]
+    (into #{} (map (partial fully-expand-profile project)
+                   unstickable-profiles))))
+
 (defn print-current-sticky-profiles
   "Given a set of profiles as an argument, print them in a standard way
    to stdout."
