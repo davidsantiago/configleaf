@@ -1,4 +1,4 @@
-(defproject configleaf "0.4.6-SNAPSHOT"
+(defproject configleaf "0.4.6"
   :description "Persistent and buildable profiles in Leiningen."
   :dependencies [[org.clojure/clojure "1.2.0"]
                  [stencil "0.3.0"]
