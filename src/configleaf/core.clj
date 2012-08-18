@@ -126,23 +126,6 @@
                        {"." "/", "-" "_"})
        ".clj"))
 
-(defn require-config-namespace
-  "Put the configured project map (according to given project) into
-  a var in the config namespace (in the current JVM). Effect is as if
-  you have 'require'd the namespace, but there is no clj file involved
-  in the process.
-
-  Note the argument is a string. You need to print the project map to a string
-  to pass it into this function. This is so the string can survive leiningen 2's
-  own macro handling, which does not prevent a project map from being evaluated,
-  which you usually can't do, due to symbols and lists that would not eval."
-  [project-as-str project-metadata-as-str]
-  (let [project (read-string project-as-str)
-        project-metadata (read-string project-metadata-as-str)
-        cl-ns-name (symbol (config-namespace project))]
-    (create-ns cl-ns-name)
-    (intern cl-ns-name (with-meta 'project project-metadata) project)))
-
 (defn output-config-namespace
   "Write a Clojure file that will set up the config namespace with the project
    in it when it is loaded. Returns the project with the profiles merged."
@@ -164,20 +147,6 @@
             :project-metadata (select-keys (meta project)
                                            [:without-profiles
                                             :included-profiles])}))))
-
-(defn set-system-properties
-  "Given a map of string keys to string values, sets the Java properties named
-   by the keys to have the value in the corresponding value."
-  [properties]
-  (let [props (Properties. (System/getProperties))]
-    (doseq [[k v] properties]
-      (try
-        (.setProperty props k v)
-        (catch Exception e
-          (println "Configleaf")
-          (println "  Java property keys and values must both be strings.")
-          (println (str "  Skipping key: " k " value: " v)))))
-    (System/setProperties props)))
 
 (defn check-gitignore
   "Check the .gitignore file for the project to see if .configleaf/ is ignored,
