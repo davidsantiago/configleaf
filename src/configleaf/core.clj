@@ -106,6 +106,13 @@
   (or (get-in project [:configleaf :namespace])
       'cfg.current))
 
+(defn config-var
+  "Get the var to put the profile info into, or use the default
+   (which is project)."
+  [project]
+  (or (get-in project [:configleaf :var])
+      'project))
+
 (defn merge-profiles
   "Given the project map and a list of profile names, merge the profiles into
    the project map and return the result. Will check the :included-profiles
@@ -126,22 +133,18 @@
                        {"." "/", "-" "_"})
        ".clj"))
 
-(defn require-config-namespace
-  "Put the configured project map (according to given project) into
-  a var in the config namespace (in the current JVM). Effect is as if
-  you have 'require'd the namespace, but there is no clj file involved
-  in the process.
-
-  Note the argument is a string. You need to print the project map to a string
-  to pass it into this function. This is so the string can survive leiningen 2's
-  own macro handling, which does not prevent a project map from being evaluated,
-  which you usually can't do, due to symbols and lists that would not eval."
-  [project-as-str project-metadata-as-str]
-  (let [project (read-string project-as-str)
-        project-metadata (read-string project-metadata-as-str)
-        cl-ns-name (symbol (config-namespace project))]
-    (create-ns cl-ns-name)
-    (intern cl-ns-name (with-meta 'project project-metadata) project)))
+(defn sub-project
+  "Return a nested subset of the project map. Also get the same nested subset from each value
+  in :profiles and put that in the :profiles at the top level. If there is :without-profiles meta on
+  project, do the same magic for it."
+  [project keyseq]
+  (when project
+    (-> (get-in project keyseq)
+        (assoc :profiles (into {}
+                               (for [[profile config] (:profiles project)]
+                                 [profile (get-in config keyseq)])))
+        (with-meta (update-in (meta project)
+                              [:without-profiles] sub-project keyseq)))))
 
 (defn output-config-namespace
   "Write a Clojure file that will set up the config namespace with the project
@@ -153,31 +156,20 @@
                      "src/")
         ns-file (io/file src-path
                          (namespace-to-filepath ns-name))
-        ns-parent-dir (.getParentFile ns-file)]
+        ns-parent-dir (.getParentFile ns-file)
+        config (if-let [keyseq (get-in project [:configleaf :keyseq])]
+                 (sub-project project keyseq)
+                 project)]
     (if (not (.exists ns-parent-dir))
       (.mkdirs ns-parent-dir))
     (spit ns-file
           (stencil/render-file
            "templates/configleafns"
            {:namespace ns-name
-            :project project
-            :project-metadata (select-keys (meta project)
-                                           [:without-profiles
-                                            :included-profiles])}))))
-
-(defn set-system-properties
-  "Given a map of string keys to string values, sets the Java properties named
-   by the keys to have the value in the corresponding value."
-  [properties]
-  (let [props (Properties. (System/getProperties))]
-    (doseq [[k v] properties]
-      (try
-        (.setProperty props k v)
-        (catch Exception e
-          (println "Configleaf")
-          (println "  Java property keys and values must both be strings.")
-          (println (str "  Skipping key: " k " value: " v)))))
-    (System/setProperties props)))
+            :var (config-var project)
+            :config config
+            :config-metadata (select-keys (meta config)
+                                          [:without-profiles :included-profiles])}))))
 
 (defn check-gitignore
   "Check the .gitignore file for the project to see if .configleaf/ is ignored,

@@ -32,7 +32,7 @@ the project itself, so you need to understand how they work.
 The only user-operable way of controlling profiles in use is using
 Leiningen's built-in `with-profile` task, which requires you to list
 all the profiles you'd like to have in effect for the task that is
-given as its argument. 
+given as its argument.
 
 When configleaf is installed, you can get a list of the currently
 active profiles by doing `lein profiles`:
@@ -152,10 +152,15 @@ key, which should contain a map of option names to their values. Here are the cu
   in the `:source-paths` key in the project.
 * `:namespace` - Set this key to the name of the namespace, as a
   symbol, that you want the project map to be output to. By default,
-  this has the value `'cfg.current`.
+  this has the value `cfg.current`.
+* `:var` - Set this key to the name of the var, as a symbol, that you
+  want the project map to be output to. By default, this has the value `project`.
 * `:verbose` - Set this key to true if you'd like Configleaf to print
   out which profiles are included whenever a task is run. By default,
   this key is false.
+* `:keyseq` - A keyseq to the subset of the project map you want to output.
+  By default, the entire project map is used, but you could only output
+  everything under `:config`, for example, by setting this to `[:config]`.
 * `:never-sticky` - When present, this should be a vector containing a list of profile name keys
   that should never be set sticky. For example, you can put your production profile in this
   key to make sure you don't accidentally set yourself into a production profile.
@@ -164,13 +169,15 @@ So for example, if the project map has the following map in the `:configleaf` ke
 
 ```clojure
 :configleaf {:config-source-path "src/main/clojure"
-             :namespace 'myproject.config
+             :namespace myproject.config
+             :var config
+             :keyseq [:config]
              :verbose true}
 ````
 
 Then the project map will be at `myproject.config/project`, which is
 in the file `src/main/clojure/myproject/config.clj`. When you run the
-command: 
+command:
 
 ```
 David$ lein with-profile test profiles
@@ -224,7 +231,7 @@ Since all of this extra output is controled by the `:verbose` key in the `:confi
 :profiles {:verbose-configleaf {:configleaf {:verbose true}}}
 ```
 
-Then 
+Then
 
 ```
 David$ lein set-profile verbose-configleaf
@@ -251,7 +258,7 @@ Then add the following key-value pair in the top level of your project map:
 
 ```
 :hooks [configleaf.hooks]
-``` 
+```
 
 That is all you need. But you will probably also want to add two
 directories to your `.gitignore` file. The first is the directory
@@ -289,7 +296,7 @@ add "src/cfg/current.clj" or possibly "src/cfg" to your `.gitignore`, if there a
 
 * Version 0.2.0
   * Addition of Java system properties to configurations.
-  * Changes to configuration map format to allow system properties. 
+  * Changes to configuration map format to allow system properties.
 
 ## License
 
