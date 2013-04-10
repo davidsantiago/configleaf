@@ -22,7 +22,7 @@ fills in the missing features in Leiningen 2's profile support:
 ## Usage
 
 The first step is learning about
-[Leiningen's profiles](https://github.com/technomancy/leiningen), in
+[Leiningen's profiles](https://github.com/technomancy/leiningen/blob/stable/doc/PROFILES.md), in
 the "Profiles" section. Configleaf only provides user interface to
 turn profiles on and off, and to make them available to the code in
 the project itself, so you need to understand how they work.
