@@ -157,13 +157,17 @@
     (if (not (.exists ns-parent-dir))
       (.mkdirs ns-parent-dir))
     (spit ns-file
-          (stencil/render-file
-           "templates/configleafns"
-           {:namespace ns-name
-            :project project
-            :project-metadata (select-keys (meta project)
-                                           [:without-profiles
-                                            :included-profiles])}))))
+          (binding [*print-dup*    false
+                    *print-meta*   false
+                    *print-length* nil
+                    *print-level*  nil]
+            (stencil/render-file
+             "templates/configleafns"
+             {:namespace ns-name
+              :project project
+              :project-metadata (select-keys (meta project)
+                                             [:without-profiles
+                                              :included-profiles])})))))
 
 (defn set-system-properties
   "Given a map of string keys to string values, sets the Java properties named
